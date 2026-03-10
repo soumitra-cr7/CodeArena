@@ -280,12 +280,29 @@
                 localStorage.setItem('sessionStart', Date.now().toString());
             }
             
-            // Apply settings from config
+            // Apply settings from config first
             if (config.admin_ip) CONFIG.ADMIN_IP = config.admin_ip;
             if (config.max_runtime) CONFIG.MAX_RUNTIME = parseInt(config.max_runtime) || 1000;
             if (config.max_memory) CONFIG.MAX_MEMORY = parseInt(config.max_memory) || 256;
             
-            // Simulate IP check for admin access
+            // Auto-login admin if IP is stored and matches config
+            const storedAdminIP = localStorage.getItem('userIP');
+            if (storedAdminIP && !appState.currentUser && !appState.isAdmin) {
+                if (storedAdminIP === CONFIG.ADMIN_IP) {
+                    appState.isAdmin = true;
+                    appState.currentUser = {
+                        userId: 'admin_' + generateId(''),
+                        username: 'Admin',
+                        isAdmin: true
+                    };
+                    logSecurityEvent('admin_auto_login', {
+                        ip: storedAdminIP,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }
+            
+            // Validate IP for admin access
             checkAdminAccess();
             
             applyConfig();
@@ -305,25 +322,32 @@
             const deviceFingerprint = generateDeviceFingerprint();
             SECURITY.deviceFingerprints.set('admin', deviceFingerprint);
             
-            // In production, this would check actual client IP from server
-            // For demo, we'll use simulated IP from localStorage
-            const simulatedIP = localStorage.getItem('userIP') || "192.168.1.100";
+            // Check if admin has stored IP (only if explicitly logged in)
+            const storedIP = localStorage.getItem('userIP');
             
-            // Validate IP format
-            if (!isValidIP(simulatedIP)) {
-                showToast('Invalid IP address', 'error');
+            if (!storedIP) {
+                // No stored IP - not admin
                 appState.isAdmin = false;
                 return;
             }
             
-            appState.isAdmin = (simulatedIP === CONFIG.ADMIN_IP);
+            // Validate IP format
+            if (!isValidIP(storedIP)) {
+                appState.isAdmin = false;
+                return;
+            }
+            
+            // Check if IP matches config
+            appState.isAdmin = (storedIP === CONFIG.ADMIN_IP);
             
             // Log security event
-            logSecurityEvent('admin_access_attempt', {
-                ip: simulatedIP,
-                granted: appState.isAdmin,
-                timestamp: new Date().toISOString()
-            });
+            if (appState.isAdmin) {
+                logSecurityEvent('admin_access_attempt', {
+                    ip: storedIP,
+                    granted: true,
+                    timestamp: new Date().toISOString()
+                });
+            }
         }
         
         function generateDeviceFingerprint() {
@@ -437,6 +461,9 @@
                 case 'register':
                     renderRegisterPage(mainContent);
                     break;
+                case 'admin-login':
+                    renderAdminLoginPage(mainContent);
+                    break;
                 case 'admin':
                     if (appState.isAdmin) {
                         renderAdminPanel(mainContent);
@@ -465,29 +492,41 @@
         
         function renderUserSection(container) {
             if (appState.currentUser) {
+                // User is logged in
                 container.innerHTML = `
                     <div class="flex items-center gap-3">
                         <div class="px-3 py-1.5 rounded-lg bg-indigo-500/20 border border-indigo-500/30">
                             <span class="text-sm text-indigo-300 mono">${appState.currentUser.username || appState.currentUser.userId}</span>
                         </div>
-                        ${appState.isAdmin ? `
-                            <button onclick="navigateTo('admin')" class="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/30 text-purple-300 text-sm hover:bg-purple-500/30 transition-all">
-                                Admin
-                            </button>
-                        ` : ''}
                         <button onclick="logout()" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm">
                             Logout
                         </button>
                     </div>
                 `;
+            } else if (appState.isAdmin) {
+                // Admin is logged in
+                container.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="px-3 py-1.5 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                            <span class="text-sm text-purple-300 mono">🔐 Admin</span>
+                        </div>
+                        <button onclick="adminLogout()" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm">
+                            Logout
+                        </button>
+                    </div>
+                `;
             } else {
+                // Not logged in - show both buttons
                 container.innerHTML = `
                     <div class="flex items-center gap-2">
                         <button onclick="navigateTo('login')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">
-                            Login
+                            User Login
                         </button>
                         <button onclick="navigateTo('register')" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
                             Register
+                        </button>
+                        <button onclick="navigateTo('admin-login')" class="px-4 py-2 rounded-lg text-purple-300 hover:text-purple-200 hover:bg-purple-500/10 transition-all border border-purple-500/30">
+                            Admin Access
                         </button>
                     </div>
                 `;
@@ -1709,8 +1748,7 @@ int main() {
             };
             
             container.innerHTML = `
-                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto animate-fade-in">
-                    <!-- User Login -->
+                <div class="max-w-md mx-auto animate-fade-in">
                     <div class="card-gradient rounded-2xl p-8 glow-border">
                         <div class="text-center mb-8">
                             <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4">
@@ -1750,39 +1788,6 @@ int main() {
                                 </button>
                             </p>
                         </div>
-                    </div>
-                    
-                    <!-- Admin Login -->
-                    <div class="card-gradient rounded-2xl p-8 glow-border border-purple-500/40">
-                        <div class="text-center mb-8">
-                            <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                </svg>
-                            </div>
-                            <h2 class="text-2xl font-bold text-white">Admin Access</h2>
-                            <p class="text-gray-400 mt-2">Platform management</p>
-                        </div>
-                        
-                        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-                            <div>
-                                <label for="admin-ip" class="block text-sm font-medium text-gray-300 mb-2">IP Address</label>
-                                <input type="text" id="admin-ip" required autocomplete="off"
-                                    class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors mono"
-                                    placeholder="Enter your IP address">
-                            </div>
-                            
-                            <div>
-                                <label for="admin-key" class="block text-sm font-medium text-gray-300 mb-2">Admin Key</label>
-                                <input type="password" id="admin-key" required
-                                    class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                                    placeholder="Enter admin key">
-                            </div>
-                            
-                            <button type="submit" id="admin-login-btn" class="w-full btn-primary py-3 rounded-xl text-white font-semibold">
-                                Access Admin Panel
-                            </button>
-                        </form>
                     </div>
                 </div>
             `;
@@ -1871,10 +1876,6 @@ int main() {
         }
         
         function renderRegisterPage(container) {
-            // Generate a quick username suggestion
-            const quickUsername = 'user_' + Math.random().toString(36).substring(2, 7).toUpperCase();
-            const quickPassword = 'Pass123456';
-            
             container.innerHTML = `
                 <div class="max-w-md mx-auto animate-fade-in">
                     <div class="card-gradient rounded-2xl p-8 glow-border">
@@ -1890,31 +1891,24 @@ int main() {
                         
                         <form onsubmit="handleRegister(event)" class="space-y-4">
                             <div>
-                                <div class="flex items-center justify-between mb-2">
-                                    <label for="register-username" class="block text-sm font-medium text-gray-300">Username</label>
-                                    <button type="button" onclick="refreshUsername()" class="text-xs text-indigo-400 hover:text-indigo-300">🔄 Refresh</button>
-                                </div>
+                                <label for="register-username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
                                 <input type="text" id="register-username" required minlength="3" maxlength="20"
-                                    value="${quickUsername}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                                    placeholder="Choose a username">
+                                    placeholder="Choose your username">
                             </div>
                             
                             <div>
                                 <label for="register-password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                                 <input type="password" id="register-password" required minlength="6"
-                                    value="${quickPassword}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                                    placeholder="Create a password">
-                                <p class="text-xs text-gray-500 mt-1">💡 Quick fill available</p>
+                                    placeholder="Minimum 6 characters">
                             </div>
                             
                             <div>
                                 <label for="register-confirm" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
                                 <input type="password" id="register-confirm" required
-                                    value="${quickPassword}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                                    placeholder="Confirm your password">
+                                    placeholder="Re-enter your password">
                             </div>
                             
                             <button type="submit" id="register-btn" class="w-full btn-primary py-3 rounded-xl text-white font-semibold">
@@ -1938,9 +1932,65 @@ int main() {
             setTimeout(renderLoginPageAsync, 0);
         }
         
-        function refreshUsername() {
-            const newUsername = 'user_' + Math.random().toString(36).substring(2, 7).toUpperCase();
-            document.getElementById('register-username').value = newUsername;
+        function renderAdminLoginPage(container) {
+            // Set timeout to populate admin IP after DOM renders
+            const renderAdminLoginPageAsync = async () => {
+                const adminIpField = container.querySelector('#admin-ip');
+                if (adminIpField) {
+                    const storedIP = localStorage.getItem('userIP');
+                    if (storedIP) {
+                        adminIpField.value = storedIP;
+                    }
+                }
+            };
+            
+            container.innerHTML = `
+                <div class="max-w-md mx-auto animate-fade-in">
+                    <div class="card-gradient rounded-2xl p-8 glow-border border-purple-500/40">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white">Admin Access</h2>
+                            <p class="text-gray-400 mt-2">Platform management</p>
+                        </div>
+                        
+                        <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                            <div>
+                                <label for="admin-ip" class="block text-sm font-medium text-gray-300 mb-2">IP Address</label>
+                                <input type="text" id="admin-ip" required autocomplete="off"
+                                    class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors mono"
+                                    placeholder="Enter your IP address">
+                            </div>
+                            
+                            <div>
+                                <label for="admin-key" class="block text-sm font-medium text-gray-300 mb-2">Admin Key</label>
+                                <input type="password" id="admin-key" required
+                                    class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                                    placeholder="Enter admin key">
+                            </div>
+                            
+                            <button type="submit" id="admin-login-btn" class="w-full btn-primary py-3 rounded-xl text-white font-semibold">
+                                Access Admin Panel
+                            </button>
+                        </form>
+                        
+                        <div class="mt-6 text-center">
+                            <p class="text-gray-400">
+                                Back to 
+                                <button onclick="navigateTo('home')" class="text-purple-400 hover:text-purple-300 font-medium ml-1">
+                                    Home
+                                </button>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Populate admin IP field after render
+            setTimeout(renderAdminLoginPageAsync, 0);
         }
         
         async function handleRegister(event) {
@@ -1969,7 +2019,7 @@ int main() {
             }
             
             registerBtn.disabled = true;
-            registerBtn.textContent = 'Creating account...';
+            registerBtn.textContent = '⚡ Creating...';
             
             const userId = generateId('user');
             const user = {
@@ -1985,12 +2035,12 @@ int main() {
             if (result.isOk) {
                 appState.currentUser = user;
                 localStorage.setItem('codeArenaUser', JSON.stringify(user));
-                showToast('Account created successfully!', 'success');
+                showToast('✅ Account created successfully!', 'success');
                 navigateTo('home');
             } else {
                 showToast('Failed to create account', 'error');
                 registerBtn.disabled = false;
-                registerBtn.textContent = 'Create Account';
+                registerBtn.textContent = '⚡ Create Account Instantly';
             }
         }
         
@@ -2002,6 +2052,18 @@ int main() {
                 appState.contestTimer = null;
             }
             showToast('Logged out successfully', 'info');
+            navigateTo('home');
+        }
+        
+        function adminLogout() {
+            appState.isAdmin = false;
+            appState.currentUser = null;
+            localStorage.removeItem('userIP');
+            if (appState.contestTimer) {
+                clearInterval(appState.contestTimer);
+                appState.contestTimer = null;
+            }
+            showToast('Admin session ended', 'info');
             navigateTo('home');
         }
         
@@ -2158,6 +2220,39 @@ int main() {
                                     </div>
                                 `).join('')}
                             </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Management -->
+                    <div class="card-gradient rounded-xl p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-semibold text-white">User Management</h2>
+                            <span class="text-sm text-gray-400">${appState.data.users.length} users total</span>
+                        </div>
+                        
+                        <div class="space-y-2 max-h-[300px] overflow-y-auto scrollbar-thin">
+                            ${appState.data.users.length > 0 
+                                ? appState.data.users.map(user => {
+                                    const userSubmissions = appState.data.submissions.filter(s => s.userRef === user.userId).length;
+                                    const joinDate = new Date(user.createdAt).toLocaleDateString();
+                                    return `
+                                        <div class="flex items-center justify-between p-4 rounded-lg bg-black/20 hover:bg-black/30 transition-colors">
+                                            <div class="flex items-center gap-4 flex-1">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                                                    ${user.username?.charAt(0).toUpperCase() || 'U'}
+                                                </div>
+                                                <div class="flex-1">
+                                                    <h3 class="text-white font-medium mono">${user.username}</h3>
+                                                    <p class="text-xs text-gray-500">Joined: ${joinDate} • Submissions: ${userSubmissions}</p>
+                                                </div>
+                                            </div>
+                                            <button onclick="confirmDeleteUser('${user.__backendId}', '${user.username}')" class="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    `;
+                                }).join('')
+                                : `<p class="text-gray-500 text-center py-8">No users registered yet</p>`}
                         </div>
                     </div>
                     
@@ -2472,15 +2567,18 @@ int main() {
         }
         
         let deleteConfirmTarget = null;
+        let deleteConfirmType = null;
         
         function confirmDeleteContest(backendId) {
-            if (deleteConfirmTarget === backendId) {
+            if (deleteConfirmTarget === backendId && deleteConfirmType === 'contest') {
                 deleteContest(backendId);
                 deleteConfirmTarget = null;
+                deleteConfirmType = null;
             } else {
                 deleteConfirmTarget = backendId;
+                deleteConfirmType = 'contest';
                 showToast('Click delete again to confirm', 'warning');
-                setTimeout(() => { deleteConfirmTarget = null; }, 3000);
+                setTimeout(() => { deleteConfirmTarget = null; deleteConfirmType = null; }, 3000);
             }
         }
         
@@ -2494,6 +2592,37 @@ int main() {
                 showToast('Contest deleted!', 'success');
             } else {
                 showToast('Failed to delete contest', 'error');
+            }
+        }
+        
+        function confirmDeleteUser(backendId, username) {
+            if (deleteConfirmTarget === backendId && deleteConfirmType === 'user') {
+                deleteUser(backendId, username);
+                deleteConfirmTarget = null;
+                deleteConfirmType = null;
+            } else {
+                deleteConfirmTarget = backendId;
+                deleteConfirmType = 'user';
+                showToast(`Click delete again to confirm deleting ${username}`, 'warning');
+                setTimeout(() => { deleteConfirmTarget = null; deleteConfirmType = null; }, 3000);
+            }
+        }
+        
+        async function deleteUser(backendId, username) {
+            const user = appState.data.users.find(u => u.__backendId === backendId);
+            if (!user) return;
+            
+            const result = await window.dataSdk.delete(user);
+            
+            if (result.isOk) {
+                logSecurityEvent('user_deleted_by_admin', {
+                    deletedUsername: username,
+                    deletedUserId: user.userId
+                });
+                showToast(`User ${username} deleted!`, 'success');
+                renderCurrentView();
+            } else {
+                showToast('Failed to delete user', 'error');
             }
         }
         
@@ -3073,5 +3202,5 @@ int main() {
         // Initialize app when DOM is ready
         initializeApp();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da2dcc22325ded3',t:'MTc3MzE1MTQwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da30705054dded3',t:'MTc3MzE1MzEzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
