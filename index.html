@@ -1,0 +1,2337 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeArena - Programming Contest Platform</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Space Grotesk', sans-serif; }
+    .code-font { font-family: 'JetBrains Mono', monospace; }
+    
+    /* Enhanced Gradients */
+    .gradient-bg { 
+      background: linear-gradient(135deg, #06051f 0%, #0f0a2e 25%, #1a0f4a 50%, #0d0820 75%, #060519 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .gradient-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    .gradient-primary { background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%); }
+    .gradient-success { background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%); }
+    
+    /* Enhanced Glass Effect */
+    .glass {
+      background: rgba(30, 27, 75, 0.4);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass:hover {
+      background: rgba(40, 35, 90, 0.5);
+      border-color: rgba(168, 85, 247, 0.25);
+      transform: translateY(-4px);
+      box-shadow: 0 25px 60px rgba(139, 92, 246, 0.2);
+    }
+    
+    .glow { box-shadow: 0 0 40px rgba(124, 58, 237, 0.4); }
+    
+    /* Code Editor Styling */
+    .code-editor { 
+      background: linear-gradient(135deg, #1a1233 0%, #2d1b4e 100%);
+      color: #e0e7ff;
+      min-height: 300px;
+      resize: vertical;
+      border-radius: 16px;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+    .code-editor:focus { 
+      outline: none;
+      border-color: rgba(168, 85, 247, 0.5);
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+    }
+    
+    /* Animations */
+    @keyframes pulse-glow { 
+      0%, 100% { box-shadow: 0 0 25px rgba(124, 58, 237, 0.5); } 
+      50% { box-shadow: 0 0 50px rgba(139, 92, 246, 0.8); } 
+    }
+    .animate-glow { animation: pulse-glow 2s infinite; }
+    
+    @keyframes float { 
+      0%, 100% { transform: translateY(0px); } 
+      50% { transform: translateY(-12px); } 
+    }
+    .float { animation: float 3.5s ease-in-out infinite; }
+    
+    @keyframes slideIn { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    .animate-slide-in { animation: slideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-up { animation: fadeInUp 0.7s ease-out; }
+    
+    /* Scrollbar */
+    .scrollbar-thin::-webkit-scrollbar { width: 8px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: rgba(139, 92, 246, 0.05); border-radius: 10px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { 
+      background: linear-gradient(180deg, #7c3aed, #a78bfa);
+      border-radius: 10px;
+      border: 2px solid rgba(139, 92, 246, 0.1);
+    }
+    
+    /* Button Styles */
+    .btn-primary { 
+      background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: none;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-primary:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 20px 50px rgba(124, 58, 237, 0.4);
+    }
+    .btn-primary:hover::before { opacity: 1; }
+    .btn-primary:active { transform: translateY(-1px); }
+    
+    /* Status Badges */
+    .status-badge { 
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .status-active { background: linear-gradient(135deg, rgba(20, 184, 166, 0.2), rgba(45, 212, 191, 0.1)); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.3); }
+    .status-draft { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+    .status-upcoming { background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(96, 165, 250, 0.1)); color: #60a5fa; border: 1px solid rgba(96, 165, 250, 0.3); }
+    .status-ended { background: linear-gradient(135deg, rgba(248, 113, 113, 0.2), rgba(252, 165, 165, 0.1)); color: #fca5a5; border: 1px solid rgba(252, 165, 165, 0.3); }
+    
+    /* Input Styles */
+    input, textarea {
+      transition: all 0.3s ease;
+    }
+    input:focus, textarea:focus {
+      background: rgba(124, 58, 237, 0.1) !important;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full bg-slate-900 text-white overflow-auto">
+  <div id="app" class="min-h-full gradient-bg">
+   <!-- Loading State -->
+   <div id="loading-screen" class="fixed inset-0 flex items-center justify-center gradient-bg z-50">
+    <div class="text-center">
+     <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+     <p class="text-indigo-300 text-lg">Loading CodeArena...</p>
+    </div>
+   </div><!-- Main Content -->
+   <div id="main-content" class="hidden">
+    <!-- Navigation -->
+    <nav id="navbar" class="glass sticky top-0 z-40 px-8 py-5 border-b border-violet-500/10">
+     <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="cursor-pointer hover:opacity-80 transition" onclick="navigateTo('home')">
+       <span id="nav-platform-name" class="text-2xl font-bold bg-gradient-to-r from-violet-300 via-purple-300 to-violet-400 bg-clip-text text-transparent">CodeArena</span>
+      </div>
+      <div id="nav-links" class="flex items-center gap-6">
+       <!-- Dynamic nav items -->
+      </div>
+     </div>
+    </nav><!-- Toast Container -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2"></div><!-- Pages Container -->
+    <div id="pages" class="max-w-7xl mx-auto px-6 py-8">
+     <!-- Home Page -->
+     <div id="page-home" class="page hidden">
+      <div class="text-center mb-16 pt-8 animate-fade-in-up">
+       <h1 id="home-welcome" class="text-6xl md:text-7xl font-black mb-6 bg-gradient-to-r from-violet-300 via-purple-300 to-violet-400 bg-clip-text text-transparent">CodeArena</h1>
+       <p class="text-violet-200/80 text-xl md:text-2xl max-w-3xl mx-auto font-light leading-relaxed">Compete. Create. Conquer.<br><span class="text-lg text-violet-300/60">Master competitive programming in a modern platform</span></p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 mb-16">
+       <div class="glass rounded-2xl p-10 group hover:glow transition-all duration-500">
+        <h2 class="text-3xl font-bold mb-4 text-white">Participant</h2>
+        <p class="text-violet-200/70 mb-8 text-base leading-relaxed">Dive into challenging programming contests, solve real-world problems, and climb the global leaderboard.</p><button onclick="navigateTo('user-auth')" class="w-full py-4 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">🚀 Enter as Participant</button>
+       </div>
+       <div class="glass rounded-2xl p-10 group hover:glow transition-all duration-500">
+        <h2 class="text-3xl font-bold mb-4 text-white">Admin Portal</h2>
+        <p class="text-violet-200/70 mb-8 text-base leading-relaxed">Design contests, craft problems, and manage the entire competitive programming ecosystem.</p><button onclick="navigateTo('admin-login')" class="w-full py-4 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 font-bold text-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">🔐 Admin Control</button>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-8">
+       <h2 class="text-2xl font-bold mb-6 text-center">Active Contests</h2>
+       <div id="home-contests-list" class="grid gap-4">
+        <p class="text-slate-500 text-center py-8">No active contests at the moment.</p>
+       </div>
+      </div>
+     </div><!-- User Authentication Page -->
+     <div id="page-user-auth" class="page hidden">
+      <div class="max-w-md mx-auto">
+       <div class="glass rounded-2xl p-8">
+        <div class="text-center mb-8">
+         <h1 id="auth-title" class="text-3xl font-bold mb-2">Register</h1>
+         <p id="auth-subtitle" class="text-slate-400">Create your account</p>
+        </div><!-- Registration Form -->
+        <form id="register-form" class="space-y-6">
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">User ID *</label> <input type="text" id="register-userid-input" placeholder="Enter your User ID" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500" required>
+         </div>
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Email *</label> <input type="email" id="register-email-input" placeholder="Enter your email" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500" required>
+         </div>
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Password *</label>
+          <div class="relative">
+           <input type="password" id="register-password-input" placeholder="Create a password" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500 pr-12" required> <button type="button" onclick="toggleRegPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"> <span class="register-password-toggle-icon">👁️</span> </button>
+          </div>
+         </div>
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Confirm Password *</label>
+          <div class="relative">
+           <input type="password" id="register-confirm-input" placeholder="Confirm your password" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500 pr-12" required> <button type="button" onclick="toggleRegConfirmVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"> <span class="register-confirm-toggle-icon">👁️</span> </button>
+          </div>
+         </div><button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition"> Create Account </button>
+        </form><!-- Login Form (hidden initially) -->
+        <form id="login-form" class="space-y-6 hidden">
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">User ID or Email *</label> <input type="text" id="login-userid-input" placeholder="Enter your User ID or email" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500" required>
+         </div>
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Password *</label>
+          <div class="relative">
+           <input type="password" id="login-password-input" placeholder="Enter your password" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500 pr-12" required> <button type="button" onclick="toggleLoginPasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"> <span class="login-password-toggle-icon">👁️</span> </button>
+          </div>
+         </div><button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition"> Login </button>
+        </form>
+        <p id="auth-toggle" class="text-center text-slate-500 text-sm mt-6 cursor-pointer hover:text-slate-300 transition">Already have an account? <span class="text-indigo-400">Login here</span></p>
+       </div>
+      </div>
+     </div><!-- Admin Login Page -->
+     <div id="page-admin-login" class="page hidden">
+      <div class="max-w-md mx-auto">
+       <div class="glass rounded-2xl p-8">
+        <div class="text-center mb-8">
+         <h1 class="text-3xl font-bold mb-2">Admin Login</h1>
+         <p class="text-slate-400">Access the admin panel</p>
+        </div>
+        <form id="admin-login-form" class="space-y-6">
+         <div>
+          <label class="block text-sm font-medium text-slate-300 mb-2">Admin Password</label>
+          <div class="relative">
+           <input type="password" id="admin-password-input" placeholder="Enter admin password" class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500 pr-12" required> <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition"> <span id="password-toggle-icon">👁️</span> </button>
+          </div>
+         </div><button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-semibold hover:opacity-90 transition"> Login </button>
+        </form>
+       </div>
+      </div>
+     </div><!-- User Dashboard -->
+     <div id="page-user-dashboard" class="page hidden">
+      <div class="flex items-center justify-between mb-8">
+       <div>
+        <h1 class="text-3xl font-bold mb-2">Welcome, <span id="user-greeting" class="text-green-400"></span>!</h1>
+        <p class="text-slate-400">Choose a contest to participate</p>
+       </div><button onclick="logoutUser()" class="px-6 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition"> Logout </button>
+      </div>
+      <div class="grid lg:grid-cols-3 gap-6 mb-8">
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+          <span class="text-2xl">🏆</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Contests Joined</p>
+          <p id="stat-contests" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+          <span class="text-2xl">✅</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Problems Solved</p>
+          <p id="stat-solved" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <span class="text-2xl">⭐</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Total Score</p>
+          <p id="stat-score" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6">
+       <h2 class="text-xl font-bold mb-6">Available Contests</h2>
+       <div id="user-contests-list" class="space-y-4">
+        <p class="text-slate-500 text-center py-8">No contests available.</p>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6 mt-6">
+       <h2 class="text-xl font-bold mb-6">Your Submissions</h2>
+       <div id="user-submissions-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-thin">
+        <p class="text-slate-500 text-center py-8">No submissions yet.</p>
+       </div>
+      </div>
+     </div><!-- Admin Dashboard -->
+     <div id="page-admin-dashboard" class="page hidden">
+      <div class="flex items-center justify-between mb-8">
+       <div>
+        <h1 class="text-3xl font-bold mb-2">Admin Dashboard</h1>
+        <p class="text-slate-400">Manage contests, problems, and monitor submissions</p>
+       </div>
+       <div class="flex gap-3">
+        <button onclick="openCreateContestModal()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-semibold hover:opacity-90 transition flex items-center gap-2"> <span>➕</span> Create Contest </button> <button onclick="logoutAdmin()" class="px-6 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition"> Logout </button>
+       </div>
+      </div>
+      <div class="grid lg:grid-cols-4 gap-6 mb-8">
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center">
+          <span class="text-2xl">🏆</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Total Contests</p>
+          <p id="admin-stat-contests" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+          <span class="text-2xl">📝</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Total Problems</p>
+          <p id="admin-stat-problems" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <span class="text-2xl">👥</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Total Users</p>
+          <p id="admin-stat-users" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+       <div class="glass rounded-xl p-6">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
+          <span class="text-2xl">📤</span>
+         </div>
+         <div>
+          <p class="text-slate-400 text-sm">Submissions</p>
+          <p id="admin-stat-submissions" class="text-2xl font-bold text-white">0</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-6">
+       <div class="glass rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-6">Contests</h2>
+        <div id="admin-contests-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-thin">
+         <p class="text-slate-500 text-center py-8">No contests created yet.</p>
+        </div>
+       </div>
+       <div class="glass rounded-2xl p-6">
+        <h2 class="text-xl font-bold mb-6">Recent Submissions</h2>
+        <div id="admin-submissions-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-thin">
+         <p class="text-slate-500 text-center py-8">No submissions yet.</p>
+        </div>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6 mt-6">
+       <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold">Manage Users</h2>
+        <div class="relative w-64">
+         <input type="text" id="user-search-input" placeholder="Search by User ID..." class="w-full px-4 py-2 rounded-lg bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white placeholder-slate-500 text-sm"> <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+        </div>
+       </div>
+       <div id="admin-users-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-thin">
+        <p class="text-slate-500 text-center py-8">No users yet.</p>
+       </div>
+      </div>
+     </div><!-- Contest Page (for users) -->
+     <div id="page-contest" class="page hidden">
+      <div class="flex items-center justify-between mb-6">
+       <button onclick="navigateTo('user-dashboard')" class="flex items-center gap-2 text-slate-400 hover:text-white transition"> <span>←</span> Back to Dashboard </button>
+       <div id="contest-timer" class="glass px-6 py-3 rounded-xl font-bold text-lg">
+        <span class="text-slate-400">Time Left:</span> <span id="timer-display" class="text-green-400 code-font ml-2">01:30:00</span>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6 mb-6">
+       <h1 id="contest-title" class="text-3xl font-bold mb-2">Contest Title</h1>
+       <p id="contest-description" class="text-slate-400">Contest description...</p>
+      </div>
+      <div class="grid lg:grid-cols-4 gap-6">
+       <div class="glass rounded-2xl p-6">
+        <h2 class="text-lg font-bold mb-4">Problems</h2>
+        <div id="contest-problems-nav" class="space-y-2">
+         <!-- Problem navigation -->
+        </div>
+       </div>
+       <div class="lg:col-span-3">
+        <div id="problem-content" class="glass rounded-2xl p-6">
+         <p class="text-slate-500 text-center py-8">Select a problem to view</p>
+        </div>
+       </div>
+      </div>
+     </div><!-- Contest Management Page (Admin) -->
+     <div id="page-contest-manage" class="page hidden">
+      <div class="flex items-center justify-between mb-6">
+       <button onclick="navigateTo('admin-dashboard')" class="flex items-center gap-2 text-slate-400 hover:text-white transition"> <span>←</span> Back to Dashboard </button>
+       <div class="flex gap-3">
+        <button onclick="openAddProblemModal()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition flex items-center gap-2"> <span>➕</span> Add Problem </button>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6 mb-6">
+       <h1 id="manage-contest-title" class="text-3xl font-bold mb-2">Contest Title</h1>
+       <div class="flex items-center gap-4 text-slate-400">
+        <span id="manage-contest-status" class="px-3 py-1 rounded-full bg-slate-700 text-sm">Draft</span> <span id="manage-contest-time">Start: Not set</span>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6 mb-6">
+       <h2 class="text-xl font-bold mb-4">Problems</h2>
+       <div id="manage-problems-list" class="space-y-4">
+        <p class="text-slate-500 text-center py-8">No problems added yet.</p>
+       </div>
+      </div>
+      <div class="glass rounded-2xl p-6">
+       <h2 class="text-xl font-bold mb-4">Scoreboard</h2>
+       <div id="contest-scoreboard" class="overflow-x-auto">
+        <table class="w-full">
+         <thead>
+          <tr class="text-left text-slate-400 border-b border-slate-700">
+           <th class="py-3 px-4">Rank</th>
+           <th class="py-3 px-4">User ID</th>
+           <th class="py-3 px-4">Score</th>
+           <th class="py-3 px-4">Penalty</th>
+           <th class="py-3 px-4">Final Score</th>
+          </tr>
+         </thead>
+         <tbody id="scoreboard-body">
+          <tr>
+           <td colspan="5" class="text-center py-8 text-slate-500">No participants yet.</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div><!-- Leaderboard Page -->
+     <div id="page-leaderboard" class="page hidden">
+      <div class="flex items-center justify-between mb-6">
+       <button onclick="goBackFromLeaderboard()" class="flex items-center gap-2 text-slate-400 hover:text-white transition"> <span>←</span> Back </button>
+       <h1 class="text-2xl font-bold">Contest Leaderboard</h1>
+       <div></div>
+      </div>
+      <div class="glass rounded-2xl p-6">
+       <h2 id="leaderboard-contest-title" class="text-xl font-bold mb-4">Contest Title</h2>
+       <div class="overflow-x-auto">
+        <table class="w-full">
+         <thead>
+          <tr class="text-left text-slate-400 border-b border-slate-700">
+           <th class="py-3 px-4">🏆 Rank</th>
+           <th class="py-3 px-4">User ID</th>
+           <th class="py-3 px-4">Email</th>
+           <th class="py-3 px-4">Problems Solved</th>
+           <th class="py-3 px-4">Raw Score</th>
+           <th class="py-3 px-4">AI Penalty</th>
+           <th class="py-3 px-4">Final Score</th>
+          </tr>
+         </thead>
+         <tbody id="leaderboard-body">
+          <tr>
+           <td colspan="7" class="text-center py-8 text-slate-500">No participants yet.</td>
+          </tr>
+         </tbody>
+        </table>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- Modals -->
+   <div id="modal-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="modal-content" class="glass rounded-2xl p-6 max-w-2xl w-full max-h-[90%] overflow-y-auto scrollbar-thin">
+     <!-- Modal content injected here -->
+    </div>
+   </div><!-- Confirmation Modal -->
+   <div id="confirm-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass rounded-2xl p-6 max-w-md w-full">
+     <h3 id="confirm-title" class="text-xl font-bold mb-4">Confirm Action</h3>
+     <p id="confirm-message" class="text-slate-400 mb-6">Are you sure?</p>
+     <div class="flex gap-3">
+      <button id="confirm-cancel" class="flex-1 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition">Cancel</button> <button id="confirm-ok" class="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-600 transition">Confirm</button>
+     </div>
+    </div>
+   </div><!-- Footer -->
+   <footer class="text-center py-8 mt-16 border-t border-slate-700/50">
+    <p class="text-slate-500 text-sm">Designed by CodeContest</p>
+   </footer>
+  </div>
+  <script>
+    // ==================== State Management ====================
+    let appData = [];
+    let currentUser = null;
+    let isAdmin = false;
+    let currentPage = 'home';
+    let currentContest = null;
+    let currentProblem = null;
+    let contestTimer = null;
+    let contestEndTime = null;
+
+    const defaultConfig = {
+      platform_name: 'CodeContest',
+      welcome_message: 'Welcome to CodeContest'
+    };
+
+    // Simple hash for passwords (client-side only - for demo purposes)
+    function simpleHash(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return hash.toString(36);
+    }
+
+    // ==================== SDK Initialization ====================
+    const dataHandler = {
+      onDataChanged(data) {
+        appData = data;
+        renderCurrentPage();
+      }
+    };
+
+    async function initApp() {
+      try {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          console.error('Failed to initialize data SDK');
+        }
+      } catch (e) {
+        console.error('SDK init error:', e);
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('nav-platform-name').textContent = config.platform_name || defaultConfig.platform_name;
+            document.getElementById('home-welcome').textContent = config.welcome_message || defaultConfig.welcome_message;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['platform_name', config.platform_name || defaultConfig.platform_name],
+            ['welcome_message', config.welcome_message || defaultConfig.welcome_message]
+          ])
+        });
+      }
+
+      // Check for stored session
+      const storedUser = sessionStorage.getItem('currentUser');
+      const storedAdmin = sessionStorage.getItem('isAdmin');
+      
+      if (storedUser) {
+        currentUser = JSON.parse(storedUser);
+        navigateTo('user-dashboard');
+      } else if (storedAdmin === 'true') {
+        isAdmin = true;
+        navigateTo('admin-dashboard');
+      } else {
+        navigateTo('home');
+      }
+
+      document.getElementById('loading-screen').classList.add('hidden');
+      document.getElementById('main-content').classList.remove('hidden');
+
+      // Setup auth forms
+      setupAuthForms();
+    }
+
+    initApp();
+
+    // ==================== Authentication Setup ====================
+    function setupAuthForms() {
+      document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await registerUser();
+      });
+
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await loginUser();
+      });
+
+      document.getElementById('auth-toggle').addEventListener('click', () => {
+        const regForm = document.getElementById('register-form');
+        const logForm = document.getElementById('login-form');
+        const title = document.getElementById('auth-title');
+        const subtitle = document.getElementById('auth-subtitle');
+        const toggle = document.getElementById('auth-toggle');
+
+        if (regForm.classList.contains('hidden')) {
+          // Switch to register
+          regForm.classList.remove('hidden');
+          logForm.classList.add('hidden');
+          title.textContent = 'Register';
+          subtitle.textContent = 'Create your account';
+          toggle.innerHTML = 'Already have an account? <span class="text-indigo-400">Login here</span>';
+        } else {
+          // Switch to login
+          regForm.classList.add('hidden');
+          logForm.classList.remove('hidden');
+          title.textContent = 'Login';
+          subtitle.textContent = 'Enter your credentials';
+          toggle.innerHTML = 'New here? <span class="text-indigo-400">Register here</span>';
+        }
+      });
+
+      document.getElementById('admin-login-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        loginAdmin();
+      });
+    }
+
+    function toggleRegPasswordVisibility() {
+      const input = document.getElementById('register-password-input');
+      const icon = document.querySelector('.register-password-toggle-icon');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.textContent = input.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function toggleRegConfirmVisibility() {
+      const input = document.getElementById('register-confirm-input');
+      const icon = document.querySelector('.register-confirm-toggle-icon');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.textContent = input.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function toggleLoginPasswordVisibility() {
+      const input = document.getElementById('login-password-input');
+      const icon = document.querySelector('.login-password-toggle-icon');
+      input.type = input.type === 'password' ? 'text' : 'password';
+      icon.textContent = input.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function togglePasswordVisibility() {
+      const input = document.getElementById('admin-password-input');
+      const icon = document.getElementById('password-toggle-icon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = '🙈';
+      } else {
+        input.type = 'password';
+        icon.textContent = '👁️';
+      }
+    }
+
+    async function registerUser() {
+      const userId = document.getElementById('register-userid-input').value.trim();
+      const email = document.getElementById('register-email-input').value.trim();
+      const password = document.getElementById('register-password-input').value;
+      const confirm = document.getElementById('register-confirm-input').value;
+
+      if (!userId || !email || !password || !confirm) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
+      if (password !== confirm) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      // Check if user exists
+      const userExists = appData.find(d => d.type === 'user' && d.userId === userId);
+      if (userExists) {
+        showToast('User ID already taken', 'error');
+        return;
+      }
+
+      if (appData.length >= 999) {
+        showToast('Maximum users reached', 'error');
+        return;
+      }
+
+      const result = await window.dataSdk.create({
+        type: 'user',
+        userId: userId,
+        userEmail: email,
+        passwordHash: simpleHash(password),
+        blocked: false
+      });
+
+      if (result.isOk) {
+        showToast('Account created successfully! Please login.', 'success');
+        document.getElementById('register-form').reset();
+        document.getElementById('auth-toggle').click();
+      } else {
+        showToast('Failed to create account', 'error');
+      }
+    }
+
+    async function loginUser() {
+      const userIdOrEmail = document.getElementById('login-userid-input').value.trim();
+      const password = document.getElementById('login-password-input').value;
+
+      if (!userIdOrEmail || !password) {
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+
+      // Find user by ID or email
+      const user = appData.find(d => 
+        d.type === 'user' && (d.userId === userIdOrEmail || d.userEmail === userIdOrEmail)
+      );
+
+      if (!user) {
+        showToast('User not found', 'error');
+        return;
+      }
+
+      if (user.blocked) {
+        showToast('Your account has been blocked', 'error');
+        return;
+      }
+
+      if (user.passwordHash !== simpleHash(password)) {
+        showToast('Invalid password', 'error');
+        return;
+      }
+
+      currentUser = user;
+      isAdmin = false;
+      sessionStorage.setItem('currentUser', JSON.stringify(user));
+      sessionStorage.removeItem('isAdmin');
+      document.getElementById('login-form').reset();
+      showToast('Logged in successfully!', 'success');
+      navigateTo('user-dashboard');
+    }
+
+    function loginAdmin() {
+      const password = document.getElementById('admin-password-input').value;
+      
+      if (password === 'soumitra115252admin') {
+        isAdmin = true;
+        currentUser = null;
+        sessionStorage.setItem('isAdmin', 'true');
+        sessionStorage.removeItem('currentUser');
+        showToast('Welcome, Admin!', 'success');
+        navigateTo('admin-dashboard');
+      } else {
+        showToast('Invalid password', 'error');
+      }
+    }
+
+    // ==================== Navigation ====================
+    function navigateTo(page) {
+      if (!canAccessPage(page)) {
+        return;
+      }
+      
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      const pageEl = document.getElementById(`page-${page}`);
+      if (pageEl) {
+        pageEl.classList.remove('hidden');
+        currentPage = page;
+        renderCurrentPage();
+        updateNavigation();
+      }
+    }
+
+    function updateNavigation() {
+      const navLinks = document.getElementById('nav-links');
+      let html = '';
+      
+      if (currentUser) {
+        html = `
+          <button onclick="navigateTo('user-dashboard')" class="px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">Dashboard</button>
+          <span class="text-green-400 code-font text-sm">ID: ${currentUser.userId}</span>
+        `;
+      } else if (isAdmin) {
+        html = `
+          <button onclick="navigateTo('admin-dashboard')" class="px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">Dashboard</button>
+          <span class="text-indigo-400">Admin</span>
+        `;
+      } else {
+        html = `
+          <button onclick="navigateTo('user-auth')" class="px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">Register/Login</button>
+          <button onclick="navigateTo('admin-login')" class="px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">Admin</button>
+        `;
+      }
+      
+      navLinks.innerHTML = html;
+    }
+
+    function canAccessPage(page) {
+      const adminPages = ['admin-login', 'admin-dashboard', 'contest-manage'];
+      
+      if (adminPages.includes(page)) {
+        if (currentUser && !isAdmin) {
+          showToast('Access Denied: Admin area only', 'error');
+          navigateTo('user-dashboard');
+          return false;
+        }
+      }
+      
+      return true;
+    }
+
+    function renderCurrentPage() {
+      switch(currentPage) {
+        case 'home':
+          renderHomeContests();
+          break;
+        case 'user-dashboard':
+          renderUserDashboard();
+          break;
+        case 'admin-dashboard':
+          renderAdminDashboard();
+          break;
+        case 'contest':
+          renderContest();
+          break;
+        case 'contest-manage':
+          renderContestManage();
+          break;
+        case 'leaderboard':
+          renderLeaderboard();
+          break;
+      }
+    }
+
+    // ==================== Toast Notifications ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colors = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-indigo-500',
+        warning: 'bg-orange-500'
+      };
+      
+      toast.className = `${colors[type]} px-6 py-3 rounded-xl shadow-lg text-white font-medium transform transition-all duration-300 translate-x-full`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.remove('translate-x-full'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // ==================== Confirmation Dialog ====================
+    function showConfirm(title, message) {
+      return new Promise(resolve => {
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-message').textContent = message;
+        modal.classList.remove('hidden');
+        
+        const okBtn = document.getElementById('confirm-ok');
+        const cancelBtn = document.getElementById('confirm-cancel');
+        
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          okBtn.onclick = null;
+          cancelBtn.onclick = null;
+        };
+        
+        okBtn.onclick = () => { cleanup(); resolve(true); };
+        cancelBtn.onclick = () => { cleanup(); resolve(false); };
+      });
+    }
+
+    // ==================== Helper Functions ====================
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    function getContests() {
+      return appData.filter(d => d.type === 'contest');
+    }
+
+    function getProblems(contestId) {
+      return appData.filter(d => d.type === 'problem' && d.contestId === contestId);
+    }
+
+    function getUsers() {
+      return appData.filter(d => d.type === 'user');
+    }
+
+    function getSubmissions(contestId = null, userId = null) {
+      return appData.filter(d => {
+        if (d.type !== 'submission') return false;
+        if (contestId && d.contestId !== contestId) return false;
+        if (userId && d.userId !== userId) return false;
+        return true;
+      });
+    }
+
+    function getContestStatus(contest) {
+      const now = new Date();
+      const start = new Date(contest.startTime);
+      const end = new Date(start.getTime() + (contest.duration || 90) * 60000);
+      
+      if (contest.status === 'draft') return 'draft';
+      if (now < start) return 'upcoming';
+      if (now >= start && now < end) return 'active';
+      return 'ended';
+    }
+
+    function formatTime(ms) {
+      if (ms <= 0) return '00:00:00';
+      const hours = Math.floor(ms / 3600000);
+      const mins = Math.floor((ms % 3600000) / 60000);
+      const secs = Math.floor((ms % 60000) / 1000);
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // ==================== Home Page ====================
+    let contestTimers = {};
+    
+    function renderHomeContests() {
+      const contests = getContests().filter(c => c.status === 'published');
+      const container = document.getElementById('home-contests-list');
+      
+      if (contests.length === 0) {
+        container.innerHTML = '<p class="text-slate-500 text-center py-8">No active contests at the moment.</p>';
+        return;
+      }
+      
+      container.innerHTML = contests.map(c => {
+        const status = getContestStatus(c);
+        const statusColors = {
+          upcoming: 'bg-blue-500/20 text-blue-400',
+          active: 'bg-green-500/20 text-green-400',
+          ended: 'bg-slate-500/20 text-slate-400'
+        };
+        const problemCount = getProblems(c.contestId).length;
+        const start = new Date(c.startTime);
+        const end = new Date(start.getTime() + (c.duration || 90) * 60000);
+        
+        let actionButton = '';
+        if (status === 'upcoming') {
+          actionButton = `
+            <div class="text-right">
+              <div class="text-sm text-slate-400 mb-2">Starts in:</div>
+              <div id="countdown-${c.contestId}" class="text-lg font-bold text-blue-400 code-font">--:--:--</div>
+            </div>
+          `;
+          startCountdownTimer(c.contestId, start);
+        } else if (status === 'active') {
+          actionButton = `<button onclick="enterContest('${c.contestId}')" class="px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition">Enter Contest</button>`;
+        } else {
+          actionButton = `<button onclick="viewLeaderboard('${c.contestId}')" class="px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition">View Results</button>`;
+        }
+        
+        return `
+          <div class="glass rounded-xl p-6 hover:glow transition-all duration-300">
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h3 class="text-xl font-bold text-white">${c.title}</h3>
+                  <span class="px-3 py-1 rounded-full text-xs font-medium ${statusColors[status]}">${status.toUpperCase()}</span>
+                </div>
+                <p class="text-slate-400 text-sm mb-2">${c.description || 'No description'}</p>
+                <div class="flex items-center gap-4 text-sm text-slate-500">
+                  <span>📅 ${new Date(c.startTime).toLocaleString()}</span>
+                  <span>⏱️ ${c.duration || 90} minutes</span>
+                  <span>📝 ${problemCount} problems</span>
+                </div>
+              </div>
+              ${actionButton}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function startCountdownTimer(contestId, startTime) {
+      if (contestTimers[contestId]) clearInterval(contestTimers[contestId]);
+      
+      const updateCountdown = () => {
+        const remaining = startTime.getTime() - Date.now();
+        const el = document.getElementById(`countdown-${contestId}`);
+        
+        if (!el) return;
+        
+        if (remaining <= 0) {
+          clearInterval(contestTimers[contestId]);
+          el.textContent = '00:00:00';
+          renderHomeContests();
+        } else {
+          el.textContent = formatTime(remaining);
+        }
+      };
+      
+      updateCountdown();
+      contestTimers[contestId] = setInterval(updateCountdown, 1000);
+    }
+
+    // ==================== User Dashboard ====================
+    function renderUserDashboard() {
+      if (!currentUser) return;
+      
+      document.getElementById('user-greeting').textContent = currentUser.userId;
+      
+      // Stats
+      const userSubmissions = getSubmissions(null, currentUser.userId);
+      const contestsJoined = [...new Set(userSubmissions.map(s => s.contestId))].length;
+      const problemsSolved = userSubmissions.filter(s => s.result === 'Accepted').length;
+      const totalScore = userSubmissions.reduce((sum, s) => sum + (s.score || 0), 0);
+      
+      document.getElementById('stat-contests').textContent = contestsJoined;
+      document.getElementById('stat-solved').textContent = problemsSolved;
+      document.getElementById('stat-score').textContent = totalScore.toFixed(1);
+      
+      // Contests
+      const contests = getContests().filter(c => c.status === 'published');
+      const contestsContainer = document.getElementById('user-contests-list');
+      
+      if (contests.length === 0) {
+        contestsContainer.innerHTML = '<p class="text-slate-500 text-center py-8">No contests available.</p>';
+      } else {
+        contestsContainer.innerHTML = contests.map(c => {
+          const status = getContestStatus(c);
+          const statusColors = {
+            upcoming: 'bg-blue-500/20 text-blue-400',
+            active: 'bg-green-500/20 text-green-400',
+            ended: 'bg-slate-500/20 text-slate-400'
+          };
+          const problemCount = getProblems(c.contestId).length;
+          
+          let actionButton = '';
+          if (status === 'active') {
+            actionButton = `<button onclick="enterContest('${c.contestId}')" class="px-6 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition">Enter Contest</button>`;
+          } else if (status === 'upcoming') {
+            actionButton = `<span class="text-blue-400">Starts ${new Date(c.startTime).toLocaleString()}</span>`;
+          } else {
+            actionButton = `<button onclick="viewLeaderboard('${c.contestId}')" class="px-4 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition">View Results</button>`;
+          }
+          
+          return `
+            <div class="glass rounded-xl p-4 flex items-center justify-between">
+              <div>
+                <div class="flex items-center gap-3 mb-1">
+                  <h3 class="font-bold text-white">${c.title}</h3>
+                  <span class="px-2 py-0.5 rounded-full text-xs ${statusColors[status]}">${status}</span>
+                </div>
+                <p class="text-slate-500 text-sm">${problemCount} problems • ${c.duration || 90} min</p>
+              </div>
+              ${actionButton}
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Submissions
+      const submissionsContainer = document.getElementById('user-submissions-list');
+      if (userSubmissions.length === 0) {
+        submissionsContainer.innerHTML = '<p class="text-slate-500 text-center py-8">No submissions yet.</p>';
+      } else {
+        submissionsContainer.innerHTML = userSubmissions.slice(-20).reverse().map(s => {
+          const resultColor = s.result === 'Accepted' ? 'text-green-400' : 'text-red-400';
+          const contest = appData.find(c => c.type === 'contest' && c.contestId === s.contestId);
+          const problem = appData.find(p => p.type === 'problem' && p.problemId === s.problemId);
+          
+          return `
+            <div class="glass rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="font-medium">${problem?.problemTitle || 'Unknown Problem'}</span>
+                <span class="${resultColor} font-bold">${s.result}</span>
+              </div>
+              <div class="flex items-center justify-between text-sm text-slate-500">
+                <span>${contest?.title || 'Unknown Contest'}</span>
+                <span>Score: ${s.score?.toFixed(1) || 0} ${s.similarity >= 80 ? `(AI: ${s.similarity}%)` : ''}</span>
+              </div>
+              <button onclick="viewSubmissionCode('${s.__backendId}')" class="mt-2 text-indigo-400 text-sm hover:underline">View Code</button>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function viewSubmissionCode(submissionId) {
+      const submission = appData.find(s => s.__backendId === submissionId);
+      if (!submission) return;
+      
+      const problem = appData.find(p => p.type === 'problem' && p.problemId === submission.problemId);
+      
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Submission Details</h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <p class="text-slate-400 text-sm">Problem</p>
+            <p class="font-medium">${problem?.problemTitle || 'Unknown'}</p>
+          </div>
+          <div>
+            <p class="text-slate-400 text-sm">Result</p>
+            <p class="font-bold ${submission.result === 'Accepted' ? 'text-green-400' : 'text-red-400'}">${submission.result}</p>
+          </div>
+          <div>
+            <p class="text-slate-400 text-sm">Score</p>
+            <p class="font-medium">${submission.score?.toFixed(1) || 0} / 5.0</p>
+          </div>
+          ${submission.similarity >= 80 ? `
+          <div class="bg-orange-500/20 border border-orange-500/50 rounded-lg p-4">
+            <p class="text-orange-400 font-medium">⚠️ AI Similarity Detected: ${submission.similarity}%</p>
+            <p class="text-orange-300 text-sm">A penalty of 2.5 points was applied.</p>
+          </div>
+          ` : ''}
+          <div>
+            <p class="text-slate-400 text-sm mb-2">Submitted Code</p>
+            <pre class="code-editor rounded-lg p-4 text-sm overflow-auto max-h-96 code-font">${escapeHtml(submission.code || 'No code')}</pre>
+          </div>
+          <div>
+            <p class="text-slate-400 text-sm">Submitted At</p>
+            <p class="text-sm">${new Date(submission.submittedAt).toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ==================== Admin Dashboard ====================
+    function renderAdminDashboard() {
+      const contests = getContests();
+      const problems = appData.filter(d => d.type === 'problem');
+      const users = getUsers();
+      const submissions = appData.filter(d => d.type === 'submission');
+      
+      document.getElementById('admin-stat-contests').textContent = contests.length;
+      document.getElementById('admin-stat-problems').textContent = problems.length;
+      document.getElementById('admin-stat-users').textContent = users.length;
+      document.getElementById('admin-stat-submissions').textContent = submissions.length;
+      
+      // Render users with search
+      renderUsersList(users);
+      
+      // Setup search
+      const searchInput = document.getElementById('user-search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          const query = e.target.value.toLowerCase();
+          const filtered = users.filter(u => u.userId.toLowerCase().includes(query));
+          renderUsersList(filtered);
+        });
+      }
+      
+      // Contests list
+      const contestsContainer = document.getElementById('admin-contests-list');
+      if (contests.length === 0) {
+        contestsContainer.innerHTML = '<p class="text-slate-500 text-center py-8">No contests created yet.</p>';
+      } else {
+        contestsContainer.innerHTML = contests.map(c => {
+          const status = c.status === 'draft' ? 'draft' : getContestStatus(c);
+          const statusColors = {
+            draft: 'bg-slate-500/20 text-slate-400',
+            upcoming: 'bg-blue-500/20 text-blue-400',
+            active: 'bg-green-500/20 text-green-400',
+            ended: 'bg-red-500/20 text-red-400'
+          };
+          const problemCount = getProblems(c.contestId).length;
+          
+          return `
+            <div class="glass rounded-lg p-4">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <h3 class="font-bold">${c.title}</h3>
+                  <span class="px-2 py-0.5 rounded-full text-xs ${statusColors[status]}">${status}</span>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="manageContest('${c.contestId}')" class="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition text-sm">Manage</button>
+                  <button onclick="deleteContest('${c.__backendId}')" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition text-sm">Delete</button>
+                </div>
+              </div>
+              <p class="text-slate-500 text-sm">${problemCount} problems • ${c.duration || 90} min</p>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Recent submissions
+      const submissionsContainer = document.getElementById('admin-submissions-list');
+      if (submissions.length === 0) {
+        submissionsContainer.innerHTML = '<p class="text-slate-500 text-center py-8">No submissions yet.</p>';
+      } else {
+        submissionsContainer.innerHTML = submissions.slice(-10).reverse().map(s => {
+          const resultColor = s.result === 'Accepted' ? 'text-green-400' : 'text-red-400';
+          const problem = appData.find(p => p.type === 'problem' && p.problemId === s.problemId);
+          
+          return `
+            <div class="glass rounded-lg p-3">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="font-medium">${s.userId}</span>
+                  <span class="text-slate-500 text-sm ml-2">${problem?.problemTitle || 'Unknown'}</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="${resultColor} text-sm font-bold">${s.result}</span>
+                  ${s.similarity >= 80 ? `<span class="text-orange-400 text-xs">AI: ${s.similarity}%</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function renderUsersList(users) {
+      const usersContainer = document.getElementById('admin-users-list');
+      const submissions = appData.filter(d => d.type === 'submission');
+      
+      if (users.length === 0) {
+        usersContainer.innerHTML = '<p class="text-slate-500 text-center py-8">No users found.</p>';
+      } else {
+        usersContainer.innerHTML = users.map(u => {
+          const userSubmissions = submissions.filter(s => s.userId === u.userId).length;
+          const isBlocked = u.blocked;
+          
+          return `
+            <div class="glass rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="font-bold text-white">${u.userId}</h3>
+                    ${isBlocked ? '<span class="px-2 py-1 rounded-lg bg-red-500/20 text-red-400 text-xs font-medium">🚫 BLOCKED</span>' : '<span class="px-2 py-1 rounded-lg bg-green-500/20 text-green-400 text-xs font-medium">✅ Active</span>'}
+                  </div>
+                  <p class="text-slate-400 text-sm mb-2">${u.userEmail}</p>
+                  <div class="text-xs text-slate-500 bg-slate-800/50 rounded px-2 py-1 inline-block code-font">
+                    ID: ${u.userId}
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-slate-400 text-sm mb-3">${userSubmissions} submissions</p>
+                  <button onclick="toggleUserBlock('${u.__backendId}')" class="px-4 py-2 rounded-lg ${isBlocked ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'} transition text-sm font-medium">
+                    ${isBlocked ? '🔓 Unblock' : '🚫 Block'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    // ==================== Contest Management ====================
+    function openCreateContestModal() {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      
+      const now = new Date();
+      const defaultStart = new Date(now.getTime() + 3600000).toISOString().slice(0, 16);
+      
+      content.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Create New Contest</h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <form id="create-contest-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Contest Title *</label>
+            <input type="text" id="contest-title-input" placeholder="e.g., Weekly Challenge #1" 
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Description</label>
+            <textarea id="contest-desc-input" placeholder="Contest description..." rows="3"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Start Time *</label>
+              <input type="datetime-local" id="contest-start-input" value="${defaultStart}"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white" required>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Duration (minutes)</label>
+              <input type="number" id="contest-duration-input" value="90" min="15" max="300"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white">
+            </div>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 transition">Cancel</button>
+            <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-semibold hover:opacity-90 transition">Create Contest</button>
+          </div>
+        </form>
+      `;
+      
+      modal.classList.remove('hidden');
+      
+      document.getElementById('create-contest-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await createContest();
+      });
+    }
+
+    async function createContest() {
+      if (appData.length >= 999) {
+        showToast('Maximum data limit reached', 'error');
+        return;
+      }
+      
+      const title = document.getElementById('contest-title-input').value.trim();
+      const description = document.getElementById('contest-desc-input').value.trim();
+      const startTime = document.getElementById('contest-start-input').value;
+      const duration = parseInt(document.getElementById('contest-duration-input').value) || 90;
+      
+      if (!title || !startTime) {
+        showToast('Please fill required fields', 'error');
+        return;
+      }
+      
+      const contestId = generateId();
+      
+      const result = await window.dataSdk.create({
+        type: 'contest',
+        contestId: contestId,
+        title: title,
+        description: description,
+        startTime: new Date(startTime).toISOString(),
+        duration: duration,
+        status: 'draft'
+      });
+      
+      if (result.isOk) {
+        showToast('Contest created successfully!', 'success');
+        closeModal();
+      } else {
+        showToast('Failed to create contest', 'error');
+      }
+    }
+
+    async function deleteContest(backendId) {
+      const confirmed = await showConfirm('Delete Contest', 'Are you sure you want to delete this contest? All problems will also be deleted.');
+      if (!confirmed) return;
+      
+      const contest = appData.find(d => d.__backendId === backendId);
+      if (!contest) return;
+      
+      // Delete associated problems
+      const problems = getProblems(contest.contestId);
+      for (const problem of problems) {
+        await window.dataSdk.delete(problem);
+      }
+      
+      const result = await window.dataSdk.delete(contest);
+      if (result.isOk) {
+        showToast('Contest deleted', 'success');
+      } else {
+        showToast('Failed to delete contest', 'error');
+      }
+    }
+
+    function manageContest(contestId) {
+      currentContest = appData.find(c => c.type === 'contest' && c.contestId === contestId);
+      if (currentContest) {
+        navigateTo('contest-manage');
+      }
+    }
+
+    function renderContestManage() {
+      if (!currentContest) return;
+      
+      document.getElementById('manage-contest-title').textContent = currentContest.title;
+      
+      const status = currentContest.status === 'draft' ? 'Draft' : getContestStatus(currentContest);
+      const statusEl = document.getElementById('manage-contest-status');
+      statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      statusEl.className = `px-3 py-1 rounded-full text-sm ${
+        status === 'draft' ? 'bg-slate-700' : 
+        status === 'active' ? 'bg-green-500/20 text-green-400' : 
+        status === 'upcoming' ? 'bg-blue-500/20 text-blue-400' : 'bg-red-500/20 text-red-400'
+      }`;
+      
+      document.getElementById('manage-contest-time').textContent = `Start: ${new Date(currentContest.startTime).toLocaleString()}`;
+      
+      // Problems
+      const problems = getProblems(currentContest.contestId);
+      const problemsContainer = document.getElementById('manage-problems-list');
+      
+      let problemsHtml = '';
+      
+      if (currentContest.status === 'draft') {
+        problemsHtml += `
+          <div class="flex justify-end mb-4">
+            <button onclick="publishContest()" class="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 font-semibold hover:opacity-90 transition">
+              Publish Contest
+            </button>
+          </div>
+        `;
+      }
+      
+      if (problems.length === 0) {
+        problemsHtml += '<p class="text-slate-500 text-center py-8">No problems added yet. Click "Add Problem" to get started.</p>';
+      } else {
+        problemsHtml += problems.map((p, i) => `
+          <div class="glass rounded-lg p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="text-slate-400 text-sm">Problem ${i + 1}</span>
+                <h4 class="font-bold">${p.problemTitle}</h4>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="editProblem('${p.__backendId}')" class="px-3 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition text-sm">Edit</button>
+                <button onclick="deleteProblem('${p.__backendId}')" class="px-3 py-1 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition text-sm">Delete</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+      
+      problemsContainer.innerHTML = problemsHtml;
+      
+      // Scoreboard
+      renderContestScoreboard();
+    }
+
+    async function publishContest() {
+      const problems = getProblems(currentContest.contestId);
+      if (problems.length === 0) {
+        showToast('Add at least one problem before publishing', 'error');
+        return;
+      }
+      
+      const confirmed = await showConfirm('Publish Contest', 'Once published, the contest will be visible to all users. Continue?');
+      if (!confirmed) return;
+      
+      const updatedContest = { ...currentContest, status: 'published' };
+      const result = await window.dataSdk.update(updatedContest);
+      
+      if (result.isOk) {
+        currentContest = updatedContest;
+        showToast('Contest published!', 'success');
+      } else {
+        showToast('Failed to publish contest', 'error');
+      }
+    }
+
+    function openAddProblemModal() {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Add Problem</h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <form id="add-problem-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Problem Title *</label>
+            <input type="text" id="problem-title-input" placeholder="e.g., Two Sum" 
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Problem Description *</label>
+            <textarea id="problem-desc-input" placeholder="Describe the problem..." rows="4"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none" required></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Input Description</label>
+              <textarea id="problem-input-desc" placeholder="Input format..." rows="2"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Output Description</label>
+              <textarea id="problem-output-desc" placeholder="Output format..." rows="2"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none"></textarea>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Sample Input</label>
+              <textarea id="problem-sample-input" placeholder="5\n1 2 3 4 5" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Sample Output</label>
+              <textarea id="problem-sample-output" placeholder="15" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none"></textarea>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Constraints</label>
+            <textarea id="problem-constraints" placeholder="1 ≤ n ≤ 10^5" rows="2"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Reference Solution (for AI detection)</label>
+            <textarea id="problem-reference" placeholder="#include <iostream>..." rows="6"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none"></textarea>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 transition">Cancel</button>
+            <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition">Add Problem</button>
+          </div>
+        </form>
+      `;
+      
+      modal.classList.remove('hidden');
+      
+      document.getElementById('add-problem-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await addProblem();
+      });
+    }
+
+    async function addProblem() {
+      if (appData.length >= 999) {
+        showToast('Maximum data limit reached', 'error');
+        return;
+      }
+      
+      const problemId = generateId();
+      
+      const result = await window.dataSdk.create({
+        type: 'problem',
+        problemId: problemId,
+        contestId: currentContest.contestId,
+        problemTitle: document.getElementById('problem-title-input').value.trim(),
+        problemDescription: document.getElementById('problem-desc-input').value.trim(),
+        inputDescription: document.getElementById('problem-input-desc').value.trim(),
+        outputDescription: document.getElementById('problem-output-desc').value.trim(),
+        sampleInput: document.getElementById('problem-sample-input').value.trim(),
+        sampleOutput: document.getElementById('problem-sample-output').value.trim(),
+        constraints: document.getElementById('problem-constraints').value.trim(),
+        referenceSolution: document.getElementById('problem-reference').value.trim()
+      });
+      
+      if (result.isOk) {
+        showToast('Problem added!', 'success');
+        closeModal();
+      } else {
+        showToast('Failed to add problem', 'error');
+      }
+    }
+
+    function editProblem(backendId) {
+      const problem = appData.find(p => p.__backendId === backendId);
+      if (!problem) return;
+      
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold">Edit Problem</h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <form id="edit-problem-form" class="space-y-4">
+          <input type="hidden" id="edit-problem-id" value="${backendId}">
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Problem Title *</label>
+            <input type="text" id="edit-problem-title" value="${problem.problemTitle || ''}"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white" required>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Problem Description *</label>
+            <textarea id="edit-problem-desc" rows="4"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none" required>${problem.problemDescription || ''}</textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Input Description</label>
+              <textarea id="edit-problem-input" rows="2"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none">${problem.inputDescription || ''}</textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Output Description</label>
+              <textarea id="edit-problem-output" rows="2"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none">${problem.outputDescription || ''}</textarea>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Sample Input</label>
+              <textarea id="edit-sample-input" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none">${problem.sampleInput || ''}</textarea>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-300 mb-2">Sample Output</label>
+              <textarea id="edit-sample-output" rows="3"
+                class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none">${problem.sampleOutput || ''}</textarea>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Constraints</label>
+            <textarea id="edit-constraints" rows="2"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white resize-none">${problem.constraints || ''}</textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-300 mb-2">Reference Solution</label>
+            <textarea id="edit-reference" rows="6"
+              class="w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700 focus:border-indigo-500 focus:outline-none transition text-white code-font text-sm resize-none">${problem.referenceSolution || ''}</textarea>
+          </div>
+          <div class="flex gap-3 pt-4">
+            <button type="button" onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-600 transition">Cancel</button>
+            <button type="submit" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 font-semibold hover:opacity-90 transition">Save Changes</button>
+          </div>
+        </form>
+      `;
+      
+      modal.classList.remove('hidden');
+      
+      document.getElementById('edit-problem-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await updateProblem();
+      });
+    }
+
+    async function updateProblem() {
+      const backendId = document.getElementById('edit-problem-id').value;
+      const problem = appData.find(p => p.__backendId === backendId);
+      if (!problem) return;
+      
+      const updated = {
+        ...problem,
+        problemTitle: document.getElementById('edit-problem-title').value.trim(),
+        problemDescription: document.getElementById('edit-problem-desc').value.trim(),
+        inputDescription: document.getElementById('edit-problem-input').value.trim(),
+        outputDescription: document.getElementById('edit-problem-output').value.trim(),
+        sampleInput: document.getElementById('edit-sample-input').value.trim(),
+        sampleOutput: document.getElementById('edit-sample-output').value.trim(),
+        constraints: document.getElementById('edit-constraints').value.trim(),
+        referenceSolution: document.getElementById('edit-reference').value.trim()
+      };
+      
+      const result = await window.dataSdk.update(updated);
+      
+      if (result.isOk) {
+        showToast('Problem updated!', 'success');
+        closeModal();
+      } else {
+        showToast('Failed to update problem', 'error');
+      }
+    }
+
+    async function deleteProblem(backendId) {
+      const confirmed = await showConfirm('Delete Problem', 'Are you sure you want to delete this problem?');
+      if (!confirmed) return;
+      
+      const problem = appData.find(p => p.__backendId === backendId);
+      if (!problem) return;
+      
+      const result = await window.dataSdk.delete(problem);
+      if (result.isOk) {
+        showToast('Problem deleted', 'success');
+      } else {
+        showToast('Failed to delete problem', 'error');
+      }
+    }
+
+    function renderContestScoreboard() {
+      const submissions = getSubmissions(currentContest.contestId);
+      const problems = getProblems(currentContest.contestId);
+      
+      // Group submissions by user
+      const userScores = {};
+      submissions.forEach(s => {
+        if (!userScores[s.userId]) {
+          userScores[s.userId] = {
+            userId: s.userId,
+            problems: {},
+            totalScore: 0,
+            totalPenalty: 0
+          };
+        }
+        
+        // Only count best submission per problem
+        if (!userScores[s.userId].problems[s.problemId] || 
+            (s.score || 0) > (userScores[s.userId].problems[s.problemId].score || 0)) {
+          userScores[s.userId].problems[s.problemId] = {
+            score: s.score || 0,
+            penalty: s.penaltyApplied ? 2.5 : 0
+          };
+        }
+      });
+      
+      // Calculate totals
+      const leaderboard = Object.values(userScores).map(u => {
+        let totalScore = 0;
+        let totalPenalty = 0;
+        Object.values(u.problems).forEach(p => {
+          totalScore += p.score;
+          totalPenalty += p.penalty;
+        });
+        return {
+          ...u,
+          totalScore,
+          totalPenalty,
+          finalScore: totalScore
+        };
+      }).sort((a, b) => b.finalScore - a.finalScore);
+      
+      const tbody = document.getElementById('scoreboard-body');
+      
+      if (leaderboard.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">No participants yet.</td></tr>';
+      } else {
+        tbody.innerHTML = leaderboard.map((u, i) => `
+          <tr class="border-b border-slate-700/50 hover:bg-slate-800/50">
+            <td class="py-3 px-4 font-bold ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-orange-400' : ''}">${i + 1}</td>
+            <td class="py-3 px-4">${u.userId}</td>
+            <td class="py-3 px-4">${u.totalScore.toFixed(1)}</td>
+            <td class="py-3 px-4 text-red-400">${u.totalPenalty > 0 ? '-' + u.totalPenalty.toFixed(1) : '0'}</td>
+            <td class="py-3 px-4 font-bold text-green-400">${u.finalScore.toFixed(1)}</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    // ==================== Contest Participation ====================
+    function enterContest(contestId) {
+      const contest = appData.find(c => c.type === 'contest' && c.contestId === contestId);
+      if (!contest) return;
+      
+      const status = getContestStatus(contest);
+      if (status !== 'active') {
+        showToast('This contest is not currently active', 'error');
+        return;
+      }
+      
+      currentContest = contest;
+      
+      // Calculate remaining time
+      const start = new Date(contest.startTime);
+      const end = new Date(start.getTime() + (contest.duration || 90) * 60000);
+      contestEndTime = end.getTime();
+      
+      navigateTo('contest');
+      startContestTimer();
+    }
+
+    function startContestTimer() {
+      if (contestTimer) clearInterval(contestTimer);
+      
+      contestTimer = setInterval(() => {
+        const remaining = contestEndTime - Date.now();
+        
+        if (remaining <= 0) {
+          clearInterval(contestTimer);
+          document.getElementById('timer-display').textContent = '00:00:00';
+          document.getElementById('timer-display').classList.remove('text-green-400');
+          document.getElementById('timer-display').classList.add('text-red-400');
+          showToast('Time is up! Contest has ended.', 'warning');
+          
+          // Run AI similarity check after 5 minutes
+          setTimeout(() => runAISimilarityCheck(currentContest.contestId), 300000);
+        } else {
+          document.getElementById('timer-display').textContent = formatTime(remaining);
+          
+          if (remaining < 300000) {
+            document.getElementById('timer-display').classList.remove('text-green-400');
+            document.getElementById('timer-display').classList.add('text-orange-400');
+          }
+        }
+      }, 1000);
+    }
+
+    function renderContest() {
+      if (!currentContest) return;
+      
+      document.getElementById('contest-title').textContent = currentContest.title;
+      document.getElementById('contest-description').textContent = currentContest.description || 'No description';
+      
+      const problems = getProblems(currentContest.contestId);
+      const navContainer = document.getElementById('contest-problems-nav');
+      
+      if (problems.length === 0) {
+        navContainer.innerHTML = '<p class="text-slate-500 text-sm">No problems available.</p>';
+      } else {
+        navContainer.innerHTML = problems.map((p, i) => {
+          const submission = getSubmissions(currentContest.contestId, currentUser?.userId)
+            .find(s => s.problemId === p.problemId);
+          const statusIcon = submission ? (submission.result === 'Accepted' ? '✅' : '❌') : '⬜';
+          
+          return `
+            <button onclick="selectProblem('${p.problemId}')" 
+              class="w-full text-left px-4 py-3 rounded-xl hover:bg-slate-700/50 transition flex items-center gap-3 ${currentProblem?.problemId === p.problemId ? 'bg-indigo-500/20 border border-indigo-500/50' : ''}">
+              <span>${statusIcon}</span>
+              <span class="font-medium">Problem ${i + 1}</span>
+            </button>
+          `;
+        }).join('');
+        
+        if (!currentProblem) {
+          selectProblem(problems[0].problemId);
+        }
+      }
+    }
+
+    function selectProblem(problemId) {
+      const problem = appData.find(p => p.type === 'problem' && p.problemId === problemId);
+      if (!problem) return;
+      
+      currentProblem = problem;
+      
+      const container = document.getElementById('problem-content');
+      const status = getContestStatus(currentContest);
+      const canSubmit = status === 'active';
+      
+      // Check if user has already submitted for this problem
+      const userSubmission = getSubmissions(currentContest.contestId, currentUser?.userId)
+        .find(s => s.problemId === problemId);
+      const hasSubmitted = !!userSubmission;
+      
+      let submissionArea = '';
+      
+      if (hasSubmitted) {
+        const resultColor = userSubmission.result === 'Accepted' ? 'text-green-400' : 'text-red-400';
+        submissionArea = `
+          <div class="border-t border-slate-700 pt-6">
+            <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
+              <p class="text-slate-400 text-sm mb-2">You have already submitted for this problem</p>
+              <div class="flex items-center justify-center gap-3 mb-4">
+                <span class="${resultColor} text-2xl font-bold">${userSubmission.result}</span>
+              </div>
+              <div class="space-y-2 text-sm">
+                <p>Score: <span class="font-bold text-indigo-400">${userSubmission.score}/5</span></p>
+                <p>Submitted: <span class="text-slate-400">${new Date(userSubmission.submittedAt).toLocaleString()}</span></p>
+                ${userSubmission.similarity >= 80 ? `<p class="text-orange-400">AI Similarity: ${userSubmission.similarity}%</p>` : ''}
+              </div>
+              <button onclick="viewSubmissionCode('${userSubmission.__backendId}')" class="mt-4 px-4 py-2 rounded-lg bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500/30 transition text-sm">
+                View Your Submission
+              </button>
+            </div>
+          </div>
+        `;
+      } else {
+        submissionArea = `
+          <div class="border-t border-slate-700 pt-6">
+            <h3 class="font-bold text-lg mb-4">Submit Solution (C++)</h3>
+            <textarea id="code-editor" placeholder="#include <iostream>
+using namespace std;
+
+int main() {
+    // Your code here
+    return 0;
+}" class="code-editor w-full rounded-xl p-4 code-font text-sm" rows="15" ${!canSubmit ? 'disabled' : ''}></textarea>
+            
+            <div class="flex items-center justify-between mt-4">
+              <div id="submission-status" class="text-sm"></div>
+              <button onclick="submitCode('${problem.problemId}')" 
+                class="px-8 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 font-semibold hover:opacity-90 transition ${!canSubmit ? 'opacity-50 cursor-not-allowed' : ''}"
+                ${!canSubmit ? 'disabled' : ''}>
+                Submit Code (One Submission Only)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+      
+      container.innerHTML = `
+        <div class="space-y-6">
+          <div>
+            <h2 class="text-2xl font-bold mb-4">${problem.problemTitle}</h2>
+            <div class="prose prose-invert max-w-none">
+              <p class="text-slate-300 whitespace-pre-wrap">${problem.problemDescription}</p>
+            </div>
+          </div>
+          
+          ${problem.inputDescription ? `
+          <div>
+            <h3 class="font-bold text-lg mb-2 text-indigo-400">Input</h3>
+            <p class="text-slate-300">${problem.inputDescription}</p>
+          </div>
+          ` : ''}
+          
+          ${problem.outputDescription ? `
+          <div>
+            <h3 class="font-bold text-lg mb-2 text-indigo-400">Output</h3>
+            <p class="text-slate-300">${problem.outputDescription}</p>
+          </div>
+          ` : ''}
+          
+          ${problem.constraints ? `
+          <div>
+            <h3 class="font-bold text-lg mb-2 text-indigo-400">Constraints</h3>
+            <p class="text-slate-300 code-font text-sm">${problem.constraints}</p>
+          </div>
+          ` : ''}
+          
+          ${problem.sampleInput || problem.sampleOutput ? `
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <h3 class="font-bold text-lg mb-2 text-indigo-400">Sample Input</h3>
+              <pre class="bg-slate-800 rounded-lg p-4 code-font text-sm overflow-auto">${problem.sampleInput || 'N/A'}</pre>
+            </div>
+            <div>
+              <h3 class="font-bold text-lg mb-2 text-indigo-400">Sample Output</h3>
+              <pre class="bg-slate-800 rounded-lg p-4 code-font text-sm overflow-auto">${problem.sampleOutput || 'N/A'}</pre>
+            </div>
+          </div>
+          ` : ''}
+          
+          ${submissionArea}
+        </div>
+      `;
+      
+      renderContest();
+    }
+
+    async function submitCode(problemId) {
+      const codeEditor = document.getElementById('code-editor');
+      const code = codeEditor.value.trim();
+      
+      if (!code) {
+        showToast('Please write some code first', 'error');
+        return;
+      }
+      
+      if (!currentUser) {
+        showToast('Please login first', 'error');
+        return;
+      }
+      
+      const status = getContestStatus(currentContest);
+      if (status !== 'active') {
+        showToast('Contest has ended', 'error');
+        return;
+      }
+      
+      if (appData.length >= 999) {
+        showToast('Maximum submissions reached', 'error');
+        return;
+      }
+      
+      const statusDiv = document.getElementById('submission-status');
+      
+      // Check for compilation errors FIRST
+      const compilationErrors = detectCompilationErrors(code);
+      if (compilationErrors.length > 0) {
+        statusDiv.innerHTML = '<span class="text-red-400">❌ Compilation Error</span>';
+        showCompilationErrorsModal(compilationErrors);
+        return;
+      }
+      
+      statusDiv.innerHTML = '<span class="text-yellow-400">⏳ Compiling and running...</span>';
+      
+      // Simulate code execution
+      await new Promise(r => setTimeout(r, 1500));
+      
+      // Get reference solution for comparison
+      const problem = appData.find(p => p.problemId === problemId);
+      const similarity = calculateSimilarity(code, problem?.referenceSolution || '');
+      
+      // Simulate test result (random for demo)
+      const passed = Math.random() > 0.3;
+      const result = passed ? 'Accepted' : 'Wrong Answer';
+      
+      // Calculate score
+      let score = passed ? 5 : -0.5;
+      const penaltyApplied = similarity >= 80;
+      if (penaltyApplied && passed) {
+        score = 2.5;
+      }
+      
+      const submissionResult = await window.dataSdk.create({
+        type: 'submission',
+        submissionId: generateId(),
+        contestId: currentContest.contestId,
+        problemId: problemId,
+        userId: currentUser.userId,
+        code: code,
+        submittedAt: new Date().toISOString(),
+        result: result,
+        score: score,
+        similarity: similarity,
+        penaltyApplied: penaltyApplied
+      });
+      
+      if (submissionResult.isOk) {
+        if (passed) {
+          statusDiv.innerHTML = `<span class="text-green-400">✅ ${result}! Score: ${score}/5 ${penaltyApplied ? '(AI penalty applied)' : ''}</span>`;
+          showToast('Solution accepted!', 'success');
+        } else {
+          statusDiv.innerHTML = `<span class="text-red-400">❌ ${result}</span>`;
+          showToast('Wrong answer. Try again!', 'error');
+        }
+      } else {
+        statusDiv.innerHTML = '<span class="text-red-400">Failed to submit</span>';
+        showToast('Submission failed', 'error');
+      }
+      
+      renderContest();
+    }
+
+    // Simple similarity calculation (Jaccard similarity on tokens)
+    function calculateSimilarity(code1, code2) {
+      if (!code1 || !code2) return Math.floor(Math.random() * 40) + 20;
+      
+      const tokenize = (code) => {
+        return code.toLowerCase()
+          .replace(/[^\w\s]/g, ' ')
+          .split(/\s+/)
+          .filter(t => t.length > 0);
+      };
+      
+      const tokens1 = new Set(tokenize(code1));
+      const tokens2 = new Set(tokenize(code2));
+      
+      const intersection = [...tokens1].filter(t => tokens2.has(t)).length;
+      const union = new Set([...tokens1, ...tokens2]).size;
+      
+      if (union === 0) return 0;
+      return Math.round((intersection / union) * 100);
+    }
+
+    // ==================== C++ Error Detection ====================
+    function detectCompilationErrors(code) {
+      const errors = [];
+      const lines = code.split('\n');
+      
+      // Check 1: Missing #include <iostream>
+      const hasInclude = code.includes('#include');
+      const hasCoutOrCin = code.includes('cout') || code.includes('cin');
+      if (hasCoutOrCin && !hasInclude) {
+        errors.push({
+          line: 1,
+          error: 'Missing #include <iostream>',
+          suggestion: 'Add #include <iostream> at the very top of your code'
+        });
+      }
+      
+      // Check 2: Missing main function
+      if (!code.includes('int main')) {
+        errors.push({
+          line: 'Function',
+          error: 'Missing main() function',
+          suggestion: 'Every C++ program needs: int main() { ... return 0; }'
+        });
+      }
+      
+      // Check 3: Unmatched braces
+      const openBraces = (code.match(/{/g) || []).length;
+      const closeBraces = (code.match(/}/g) || []).length;
+      if (openBraces !== closeBraces) {
+        errors.push({
+          line: 'Syntax',
+          error: `Unmatched braces (${openBraces} { vs ${closeBraces} })`,
+          suggestion: 'Make sure every { has a matching }'
+        });
+      }
+      
+      // Check 4: Missing semicolons on common statements
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line || line.startsWith('//') || line.startsWith('*')) continue;
+        
+        // Check cout/cin without semicolon
+        if ((line.includes('cout') || line.includes('cin')) && !line.endsWith(';') && !line.endsWith('{') && !line.endsWith(',')) {
+          errors.push({
+            line: i + 1,
+            error: `Missing semicolon on line ${i + 1}`,
+            suggestion: `Statement should end with ;`
+          });
+          break;
+        }
+        
+        // Check variable declarations without semicolon
+        if (/^\s*(int|double|string|char|bool|vector|auto)\s+\w+\s*=/.test(line) && !line.endsWith(';') && !line.endsWith('{')) {
+          errors.push({
+            line: i + 1,
+            error: `Missing semicolon on line ${i + 1}`,
+            suggestion: `Add ; at the end of this statement`
+          });
+          break;
+        }
+      }
+      
+      // Check 5: Unmatched parentheses
+      const openParens = (code.match(/\(/g) || []).length;
+      const closeParens = (code.match(/\)/g) || []).length;
+      if (openParens !== closeParens) {
+        errors.push({
+          line: 'Syntax',
+          error: `Unmatched parentheses (${openParens} ( vs ${closeParens} ))`,
+          suggestion: 'Check all function calls and conditional statements have matching )'
+        });
+      }
+      
+      // Check 6: Missing return statement in main
+      if (code.includes('int main') && !code.includes('return')) {
+        errors.push({
+          line: 'Function',
+          error: 'Missing return statement',
+          suggestion: 'Add "return 0;" before the closing } of main()'
+        });
+      }
+      
+      // Check 7: Common undeclared identifiers
+      if ((code.includes('cout') || code.includes('cin')) && !code.includes('using namespace std') && !code.includes('std::')) {
+        errors.push({
+          line: 'Namespace',
+          error: 'Undeclared identifiers (cout/cin)',
+          suggestion: 'Add "using namespace std;" after your #include statements'
+        });
+      }
+      
+      return errors;
+    }
+
+    function showCompilationErrorsModal(errors) {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      
+      content.innerHTML = `
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-2xl font-bold flex items-center gap-2">
+            <span class="text-red-400 text-3xl">⚠️</span>
+            Compilation Errors
+          </h2>
+          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl">&times;</button>
+        </div>
+        <div class="space-y-3 max-h-96 overflow-y-auto">
+          ${errors.map((err, idx) => `
+            <div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <span class="text-red-400 font-bold text-lg flex-shrink-0">error:</span>
+                <div class="flex-1">
+                  <p class="text-red-300 font-semibold">${err.error}</p>
+                  <p class="text-slate-400 text-sm mt-1">Location: Line ${err.line}</p>
+                  <p class="text-indigo-300 text-sm mt-2 italic">💡 ${err.suggestion}</p>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="mt-6 flex justify-end">
+          <button onclick="closeModal()" class="px-6 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 transition">
+            Back to Editor
+          </button>
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+    }
+
+    // AI Similarity check (runs 5 minutes after contest ends)
+    async function runAISimilarityCheck(contestId) {
+      const submissions = getSubmissions(contestId);
+      const problems = getProblems(contestId);
+      
+      for (const submission of submissions) {
+        if (submission.similarity === undefined) {
+          const problem = problems.find(p => p.problemId === submission.problemId);
+          const similarity = calculateSimilarity(submission.code, problem?.referenceSolution || '');
+          const penaltyApplied = similarity >= 80;
+          let score = submission.result === 'Accepted' ? 5 : 0;
+          if (penaltyApplied && submission.result === 'Accepted') {
+            score = 2.5;
+          }
+          
+          await window.dataSdk.update({
+            ...submission,
+            similarity: similarity,
+            penaltyApplied: penaltyApplied,
+            score: score
+          });
+        }
+      }
+      
+      showToast('AI similarity check completed', 'info');
+    }
+
+    // ==================== User Blocking ====================
+    async function toggleUserBlock(backendId) {
+      const user = appData.find(u => u.type === 'user' && u.__backendId === backendId);
+      if (!user) return;
+      
+      const isBlocked = user.blocked;
+      const action = isBlocked ? 'unblock' : 'block';
+      const confirmed = await showConfirm(
+        `${action.charAt(0).toUpperCase() + action.slice(1)} User`,
+        `Are you sure you want to ${action} ${user.userId}?`
+      );
+      
+      if (!confirmed) return;
+      
+      const updatedUser = { ...user, blocked: !isBlocked };
+      const result = await window.dataSdk.update(updatedUser);
+      
+      if (result.isOk) {
+        showToast(`User ${action}ed successfully`, 'success');
+      } else {
+        showToast(`Failed to ${action} user`, 'error');
+      }
+    }
+
+    // ==================== Leaderboard ====================
+    function viewLeaderboard(contestId) {
+      currentContest = appData.find(c => c.type === 'contest' && c.contestId === contestId);
+      if (currentContest) {
+        navigateTo('leaderboard');
+      }
+    }
+
+    function goBackFromLeaderboard() {
+      if (isAdmin) {
+        navigateTo('admin-dashboard');
+      } else if (currentUser) {
+        navigateTo('user-dashboard');
+      } else {
+        navigateTo('home');
+      }
+    }
+
+    function renderLeaderboard() {
+      if (!currentContest) return;
+      
+      document.getElementById('leaderboard-contest-title').textContent = currentContest.title;
+      
+      const submissions = getSubmissions(currentContest.contestId);
+      const problems = getProblems(currentContest.contestId);
+      
+      // Group by user
+      const userScores = {};
+      submissions.forEach(s => {
+        if (!userScores[s.userId]) {
+          userScores[s.userId] = {
+            userId: s.userId,
+            email: appData.find(u => u.type === 'user' && u.userId === s.userId)?.userEmail || 'N/A',
+            problems: {},
+            problemsSolved: 0
+          };
+        }
+        
+        if (!userScores[s.userId].problems[s.problemId] || 
+            (s.score || 0) > (userScores[s.userId].problems[s.problemId].score || 0)) {
+          userScores[s.userId].problems[s.problemId] = {
+            score: s.score || 0,
+            penalty: s.penaltyApplied ? 2.5 : 0,
+            solved: s.result === 'Accepted'
+          };
+        }
+      });
+      
+      const leaderboard = Object.values(userScores).map(u => {
+        let rawScore = 0;
+        let penalty = 0;
+        let solved = 0;
+        
+        Object.values(u.problems).forEach(p => {
+          if (p.solved) {
+            rawScore += 5;
+            penalty += p.penalty;
+            solved++;
+          }
+        });
+        
+        return {
+          ...u,
+          problemsSolved: solved,
+          rawScore,
+          penalty,
+          finalScore: rawScore - penalty
+        };
+      }).sort((a, b) => b.finalScore - a.finalScore || a.penalty - b.penalty);
+      
+      const tbody = document.getElementById('leaderboard-body');
+      
+      if (leaderboard.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-slate-500">No participants yet.</td></tr>';
+      } else {
+        tbody.innerHTML = leaderboard.map((u, i) => {
+          const rankEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`;
+          
+          return `
+            <tr class="border-b border-slate-700/50 hover:bg-slate-800/50 ${i < 3 ? 'bg-gradient-to-r from-transparent to-yellow-500/5' : ''}">
+              <td class="py-4 px-4 font-bold text-lg">${rankEmoji}</td>
+              <td class="py-4 px-4 font-medium">${u.userId}</td>
+              <td class="py-4 px-4 text-slate-400 text-sm">${u.email}</td>
+              <td class="py-4 px-4">${u.problemsSolved}/${problems.length}</td>
+              <td class="py-4 px-4">${u.rawScore.toFixed(1)}</td>
+              <td class="py-4 px-4 ${u.penalty > 0 ? 'text-red-400' : 'text-slate-500'}">${u.penalty > 0 ? '-' + u.penalty.toFixed(1) : '0'}</td>
+              <td class="py-4 px-4 font-bold text-green-400 text-lg">${u.finalScore.toFixed(1)}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+    }
+
+    // ==================== Modal Functions ====================
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.add('hidden');
+    }
+
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-overlay') {
+        closeModal();
+      }
+    });
+
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        document.getElementById('confirm-modal').classList.add('hidden');
+      }
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da188277450ded3',t:'MTc3MzEzNzQ1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
