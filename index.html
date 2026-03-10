@@ -122,32 +122,27 @@
   <style>body { box-sizing: border-box; }</style>
  </head>
  <body class="h-full gradient-bg text-gray-100 overflow-auto">
-  <div id="app" class="min-h-full w-full">
-   <!-- Toast Container -->
+  <div id="app" class="min-h-full w-full"><!-- Toast Container -->
    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div><!-- Navigation -->
    <nav id="navbar" class="sticky top-0 z-40 backdrop-blur-xl bg-black/30 border-b border-indigo-500/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
      <div class="flex items-center justify-between h-16">
       <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
         </svg>
        </div><span id="platform-title" class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">CodeArena</span>
       </div>
       <div class="flex items-center gap-4">
-       <div id="nav-links" class="hidden md:flex items-center gap-2">
-        <button onclick="navigateTo('home')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Home</button> <button onclick="navigateTo('contests')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Contests</button> <button onclick="navigateTo('leaderboard')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Leaderboard</button> <button onclick="navigateTo('submissions')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">My Submissions</button>
+       <div id="nav-links" class="hidden md:flex items-center gap-2"><button onclick="navigateTo('home')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Home</button> <button onclick="navigateTo('contests')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Contests</button> <button onclick="navigateTo('leaderboard')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Leaderboard</button> <button onclick="navigateTo('submissions')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">My Submissions</button>
        </div>
-       <div id="user-section" class="flex items-center gap-3">
-        <!-- Dynamic user section -->
+       <div id="user-section" class="flex items-center gap-3"><!-- Dynamic user section -->
        </div>
       </div>
      </div>
     </div>
    </nav><!-- Main Content -->
-   <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Dynamic content -->
+   <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><!-- Dynamic content -->
    </main>
   </div>
   <script>
@@ -1876,6 +1871,10 @@ int main() {
         }
         
         function renderRegisterPage(container) {
+            // Generate a quick username suggestion
+            const quickUsername = 'user_' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            const quickPassword = 'Pass123456';
+            
             container.innerHTML = `
                 <div class="max-w-md mx-auto animate-fade-in">
                     <div class="card-gradient rounded-2xl p-8 glow-border">
@@ -1891,8 +1890,12 @@ int main() {
                         
                         <form onsubmit="handleRegister(event)" class="space-y-4">
                             <div>
-                                <label for="register-username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="register-username" class="block text-sm font-medium text-gray-300">Username</label>
+                                    <button type="button" onclick="refreshUsername()" class="text-xs text-indigo-400 hover:text-indigo-300">🔄 Refresh</button>
+                                </div>
                                 <input type="text" id="register-username" required minlength="3" maxlength="20"
+                                    value="${quickUsername}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
                                     placeholder="Choose a username">
                             </div>
@@ -1900,13 +1903,16 @@ int main() {
                             <div>
                                 <label for="register-password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                                 <input type="password" id="register-password" required minlength="6"
+                                    value="${quickPassword}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
                                     placeholder="Create a password">
+                                <p class="text-xs text-gray-500 mt-1">💡 Quick fill available</p>
                             </div>
                             
                             <div>
                                 <label for="register-confirm" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
                                 <input type="password" id="register-confirm" required
+                                    value="${quickPassword}"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
                                     placeholder="Confirm your password">
                             </div>
@@ -1930,6 +1936,11 @@ int main() {
             
             // Populate admin IP field after render
             setTimeout(renderLoginPageAsync, 0);
+        }
+        
+        function refreshUsername() {
+            const newUsername = 'user_' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            document.getElementById('register-username').value = newUsername;
         }
         
         async function handleRegister(event) {
@@ -3062,5 +3073,5 @@ int main() {
         // Initialize app when DOM is ready
         initializeApp();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da2cb0a95b4ded3',t:'MTc3MzE1MDY3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da2dcc22325ded3',t:'MTc3MzE1MTQwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
