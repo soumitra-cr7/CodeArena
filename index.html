@@ -122,27 +122,32 @@
   <style>body { box-sizing: border-box; }</style>
  </head>
  <body class="h-full gradient-bg text-gray-100 overflow-auto">
-  <div id="app" class="min-h-full w-full"><!-- Toast Container -->
+  <div id="app" class="min-h-full w-full">
+   <!-- Toast Container -->
    <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div><!-- Navigation -->
    <nav id="navbar" class="sticky top-0 z-40 backdrop-blur-xl bg-black/30 border-b border-indigo-500/20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
      <div class="flex items-center justify-between h-16">
       <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
         </svg>
        </div><span id="platform-title" class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">CodeArena</span>
       </div>
       <div class="flex items-center gap-4">
-       <div id="nav-links" class="hidden md:flex items-center gap-2"><button onclick="navigateTo('home')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Home</button> <button onclick="navigateTo('contests')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Contests</button> <button onclick="navigateTo('leaderboard')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Leaderboard</button> <button onclick="navigateTo('submissions')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">My Submissions</button>
+       <div id="nav-links" class="hidden md:flex items-center gap-2">
+        <button onclick="navigateTo('home')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Home</button> <button onclick="navigateTo('contests')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Contests</button> <button onclick="navigateTo('leaderboard')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">Leaderboard</button> <button onclick="navigateTo('submissions')" class="px-4 py-2 rounded-lg text-gray-300 hover:text-white hover:bg-white/5 transition-all">My Submissions</button>
        </div>
-       <div id="user-section" class="flex items-center gap-3"><!-- Dynamic user section -->
+       <div id="user-section" class="flex items-center gap-3">
+        <!-- Dynamic user section -->
        </div>
       </div>
      </div>
     </div>
    </nav><!-- Main Content -->
-   <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><!-- Dynamic content -->
+   <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Dynamic content -->
    </main>
   </div>
   <script>
@@ -1903,7 +1908,8 @@ int main() {
                                 <label for="register-username" class="block text-sm font-medium text-gray-300 mb-2">Username</label>
                                 <input type="text" id="register-username" required minlength="3" maxlength="20"
                                     class="w-full px-4 py-3 rounded-xl bg-black/30 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                                    placeholder="Choose your username">
+                                    placeholder="e.g., coder_alex or programmer42">
+                                <p class="text-xs text-gray-500 mt-1">3-20 characters (letters, numbers, underscores)</p>
                             </div>
                             
                             <div>
@@ -2005,7 +2011,7 @@ int main() {
         async function handleRegister(event) {
             event.preventDefault();
             
-            const username = document.getElementById('register-username').value;
+            const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value;
             const confirm = document.getElementById('register-confirm').value;
             const registerBtn = document.getElementById('register-btn');
@@ -2015,8 +2021,18 @@ int main() {
                 return;
             }
             
+            if (username.length < 3) {
+                showToast('Username must be at least 3 characters', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
             // Check if username exists
-            if (appState.data.users.some(u => u.username === username)) {
+            if (appState.data.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
                 showToast('Username already taken', 'error');
                 return;
             }
@@ -2028,7 +2044,7 @@ int main() {
             }
             
             registerBtn.disabled = true;
-            registerBtn.textContent = '⚡ Creating...';
+            registerBtn.textContent = 'Creating account...';
             
             const userId = generateId('user');
             const user = {
@@ -2045,15 +2061,16 @@ int main() {
                 if (result.isOk) {
                     appState.currentUser = user;
                     localStorage.setItem('codeArenaUser', JSON.stringify(user));
-                    showToast('✅ Account created successfully!', 'success');
+                    logSecurityEvent('user_registered', { username });
+                    showToast('Account created! Welcome to CodeArena!', 'success');
                     navigateTo('home');
                 } else {
-                    showToast('Failed to create account: ' + (result.error?.message || 'Unknown error'), 'error');
+                    showToast(result.error?.message || 'Registration failed. Please try again.', 'error');
                     registerBtn.disabled = false;
                     registerBtn.textContent = 'Create Account';
                 }
-            } catch (err) {
-                showToast('Error creating account: ' + err.message, 'error');
+            } catch (error) {
+                showToast('An error occurred during registration', 'error');
                 registerBtn.disabled = false;
                 registerBtn.textContent = 'Create Account';
             }
@@ -3217,5 +3234,5 @@ int main() {
         // Initialize app when DOM is ready
         initializeApp();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da31944435dded3',t:'MTc3MzE1Mzg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da32a398713ded3',t:'MTc3MzE1NDU3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
