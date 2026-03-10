@@ -563,6 +563,15 @@
                                 </button>
                             ` : ''}
                         </div>
+                        
+                        <div class="mt-12 p-6 bg-indigo-500/10 border border-indigo-500/20 rounded-xl max-w-2xl mx-auto">
+                            <h3 class="text-sm font-semibold text-indigo-300 mb-2">💡 Authentication Note</h3>
+                            <p class="text-sm text-gray-400">
+                                CodeArena uses secure username/password authentication to keep your account data safe and ensure fair competition. 
+                                Each user profile is verified against submission data for anti-cheat detection. 
+                                <strong>Register with a unique username</strong> to participate in contests!
+                            </p>
+                        </div>
                     </section>
                     
                     <!-- Stats Section -->
@@ -2030,17 +2039,23 @@ int main() {
                 createdAt: new Date().toISOString()
             };
             
-            const result = await window.dataSdk.create(user);
-            
-            if (result.isOk) {
-                appState.currentUser = user;
-                localStorage.setItem('codeArenaUser', JSON.stringify(user));
-                showToast('✅ Account created successfully!', 'success');
-                navigateTo('home');
-            } else {
-                showToast('Failed to create account', 'error');
+            try {
+                const result = await window.dataSdk.create(user);
+                
+                if (result.isOk) {
+                    appState.currentUser = user;
+                    localStorage.setItem('codeArenaUser', JSON.stringify(user));
+                    showToast('✅ Account created successfully!', 'success');
+                    navigateTo('home');
+                } else {
+                    showToast('Failed to create account: ' + (result.error?.message || 'Unknown error'), 'error');
+                    registerBtn.disabled = false;
+                    registerBtn.textContent = 'Create Account';
+                }
+            } catch (err) {
+                showToast('Error creating account: ' + err.message, 'error');
                 registerBtn.disabled = false;
-                registerBtn.textContent = '⚡ Create Account Instantly';
+                registerBtn.textContent = 'Create Account';
             }
         }
         
@@ -3202,5 +3217,5 @@ int main() {
         // Initialize app when DOM is ready
         initializeApp();
     </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da30705054dded3',t:'MTc3MzE1MzEzMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9da31944435dded3',t:'MTc3MzE1Mzg4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
